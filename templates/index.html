@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sudoku Quest — Master the Grid | Handcrafted Sudoku Gaming Platform</title>
+  <meta name="description" content="Play Sudoku with 10 progression levels, complete achievements, compete in Ranked Mode, tackle daily challenges, and track your statistics.">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Socket.IO Real-time Client -->
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <!-- Ambient background lighting -->
+  <div class="ambient-glow glow-top-left"></div>
+  <div class="ambient-glow glow-bottom-right"></div>
+  <div class="ambient-grid-pattern"></div>
+
+  <!-- Navigation Bar -->
+  <header class="navbar" id="main-nav">
+    <div class="nav-container">
+      <div class="nav-brand" onclick="navigateTo('home')">
+        <div class="brand-logo">
+          <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" class="logo-svg">
+            <rect width="32" height="32" rx="8" fill="url(#logo-grad)" />
+            <rect x="5" y="5" width="6" height="6" rx="2" fill="#ffffff" fill-opacity="0.9"/>
+            <rect x="13" y="5" width="6" height="6" rx="2" fill="#6366f1"/>
+            <rect x="21" y="5" width="6" height="6" rx="2" fill="#ffffff" fill-opacity="0.9"/>
+            <rect x="5" y="13" width="6" height="6" rx="2" fill="#6366f1"/>
+            <rect x="13" y="13" width="6" height="6" rx="2" fill="#38bdf8"/>
+            <rect x="21" y="13" width="6" height="6" rx="2" fill="#6366f1"/>
+            <rect x="5" y="21" width="6" height="6" rx="2" fill="#ffffff" fill-opacity="0.9"/>
+            <rect x="13" y="21" width="6" height="6" rx="2" fill="#6366f1"/>
+            <rect x="21" y="21" width="6" height="6" rx="2" fill="#ffffff" fill-opacity="0.9"/>
+            <defs>
+              <linearGradient id="logo-grad" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#4f46e5"/>
+                <stop offset="1" stop-color="#06b6d4"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-title">SUDOKU QUEST</span>
+          <span class="brand-badge">PRO EDITION</span>
+        </div>
+      </div>
+
+      <nav class="nav-links" id="nav-menu">
+        <button class="nav-item active" data-view="home" onclick="navigateTo('home')">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          Home
+        </button>
+        <button class="nav-item" data-view="play" onclick="navigateTo('play')">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Play
+        </button>
+        <button class="nav-item" data-view="daily" onclick="navigateTo('daily')">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Daily Challenge
+        </button>
+        <button class="nav-item" data-view="achievements" onclick="navigateTo('achievements')">
+          <svg class="nav-icon text-gold" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+          Achievements
+        </button>
+        <button class="nav-item" data-view="ranked" onclick="navigateTo('ranked')">
+          <svg class="nav-icon text-purple" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+          Ranked
+        </button>
+        <button class="nav-item" data-view="stats" onclick="navigateTo('stats')">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          Statistics
+        </button>
+        <button class="nav-item" data-view="profile" onclick="navigateTo('profile')">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Profile
+        </button>
+      </nav>
+
+      <div class="nav-actions">
+        <!-- Guest Auth Buttons (Shown when logged out) -->
+        <div class="auth-nav-buttons" id="nav-guest-actions">
+          <button class="btn btn-ghost btn-sm" onclick="openAuthModal('login')">Sign In</button>
+          <button class="btn btn-primary btn-sm" onclick="openAuthModal('register')">Register</button>
+        </div>
+
+        <!-- Logged In User Pill (Shown when logged in) -->
+        <div class="user-nav-container" id="nav-user-actions" style="display: none;">
+          <!-- Ranked Rating Pill -->
+          <div class="ranked-nav-pill" onclick="navigateTo('ranked')" title="Current Ranked Tier">
+            <span class="ranked-icon" id="nav-rank-icon">🥉</span>
+            <span class="ranked-score" id="nav-rank-score">1000</span>
+            <span class="ranked-tier-name" id="nav-rank-tier">BRONZE I</span>
+          </div>
+
+          <div class="streak-pill" id="nav-streak-pill" title="Current Daily Streak">
+            <span class="streak-fire">🔥</span>
+            <span class="streak-count" id="nav-streak-count">0</span>
+            <span class="streak-label">Day Streak</span>
+          </div>
+
+          <div class="profile-pill" id="nav-profile-pill" onclick="navigateTo('profile')">
+            <div class="avatar-ring">
+              <span class="avatar-emoji" id="nav-avatar-emoji">🧙‍♂️</span>
+            </div>
+            <div class="nav-user-meta">
+              <span class="nav-username" id="nav-username">Player</span>
+              <span class="nav-user-lvl" id="nav-user-lvl">Level 1</span>
+            </div>
+            <button class="btn-signout" onclick="handleLogout(event)" title="Sign Out">🚪</button>
+          </div>
+        </div>
+
+        <!-- Mobile Menu Toggle -->
+        <button class="mobile-toggle" id="mobile-toggle" aria-label="Toggle navigation menu" onclick="toggleMobileMenu()">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Multi-View Content Container -->
+  <main class="main-content" id="app-container">
+    
+    <!-- ==================== HOME VIEW ==================== -->
+    <section class="view-section active" id="view-home">
+      <div class="hero-section">
+        <div class="hero-top-grid">
+          <div class="hero-content">
+            <div class="hero-badge">
+              <span class="badge-dot"></span>
+              <span>Real-Time Online Sudoku Engine</span>
+            </div>
+            <h1 class="hero-title">
+              MASTER THE<br><span class="gradient-text">GRID</span>
+            </h1>
+            <p class="hero-subtitle">
+              Challenge yourself. Solve faster. Climb the 10-tier progression, complete achievements, tackle daily quests, and compete in genuine Ranked ELO matches.
+            </p>
+            <div class="hero-actions">
+              <button class="btn btn-primary btn-lg" onclick="startQuickGame()">
+                <span>QUICK PLAY</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="btn-arrow"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              </button>
+              <button class="btn btn-ranked btn-lg" onclick="navigateTo('ranked')">
+                <span>🏆 RANKED LEAGUE</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="hero-visual">
+            <div class="hero-board-card glass-card">
+              <div class="h-card-top">
+                <div class="h-card-dots">
+                  <span class="dot dot-red"></span>
+                  <span class="dot dot-yellow"></span>
+                  <span class="dot dot-green"></span>
+                </div>
+                <span class="h-card-title">Live Grid Matrix</span>
+                <span class="h-card-chip">PRO ENGINE</span>
+              </div>
+              <div class="hero-mini-grid">
+                <div class="hm-cell given">5</div><div class="hm-cell">3</div><div class="hm-cell accent">.</div><div class="hm-cell">.</div><div class="hm-cell given">7</div><div class="hm-cell">.</div><div class="hm-cell">.</div><div class="hm-cell">.</div><div class="hm-cell">.</div>
+                <div class="hm-cell given">6</div><div class="hm-cell">.</div><div class="hm-cell">.</div><div class="hm-cell given">1</div><div class="hm-cell given">9</div><div class="hm-cell given">5</div><div class="hm-cell">.</div><div class="hm-cell">.</div><div class="hm-cell">.</div>
+                <div class="hm-cell">.</div><div class="hm-cell given">9</div><div class="hm-cell given">8</div><div class="hm-cell">.</div><div class="hm-cell">.</div><div class="hm-cell">.</div><div class="hm-cell">.</div><div class="hm-cell given">6</div><div class="hm-cell">.</div>
+                <div class="hm-cell given">8</div><div class="hm-cell">.</div><div class="hm-cell">.</div><div class="hm-cell">.</div><div class="hm-cell given">6</div><div class="hm-cell">.</div><div class="hm-cell">.</div><div class="hm-cell">.</div><div class="hm-cell given">3</div>
+                <div class="hm-cell given">4</div><div class="hm-cell">.</div><div class="hm-cell">.</div><div class="hm-cell given">8</div><div class="hm-cell accent active">9</div><div class="hm-cell given">3</div><div class="hm-cell">.</div><div class="hm-cell">.</div><div class="hm-cell given">1</div>
+                <div class="hm-cell given">7</div><div class="hm-cell">.</div><div class="hm-cell">.</div><div class="hm-cell">.</div><div class="hm-cell given">2</div><div class="hm-cell">.</div><div class="hm-cell">.</div><div class="hm-cell">.</div><div class="hm-cell given">6</div>
+                <div class="hm-cell">.</div><div class="hm-cell given">6</div><div class="hm-cell">.</div><div class="hm-cell">.</div><div class="hm-cell">.</div><div class="hm-cell">.</div><div class="hm-cell given">2</div><div class="hm-cell given">8</div><div class="hm-cell">.</div>
+                <div class="hm-cell">.</div><div class="hm-cell">.</div><div class="hm-cell">.</div><div class="hm-cell given">4</div><div class="hm-cell given">1</div><div class="hm-cell given">9</div><div class="hm-cell">.</div><div class="hm-cell">.</div><div class="hm-cell given">5</div>
+                <div class="hm-cell">.</div><div class="hm-cell">.</div><div class="hm-cell">.</div><div class="hm-cell">.</div><div class="hm-cell given">8</div><div class="hm-cell">.</div><div class="hm-cell">.</div><div class="hm-cell given">7</div><div class="hm-cell given">9</div>
+              </div>
+              <div class="h-card-bottom">
+                <span class="h-metric">🎯 Accuracy: <strong>100%</strong></span>
+                <span class="h-metric">⚡ Speed: <strong>240 CPM</strong></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3 Modern Real-Time Status Cards -->
+        <div class="hero-stats-row">
+          <div class="hero-stat-card glass-card">
+            <div class="stat-card-icon">🧩</div>
+            <div class="stat-card-body">
+              <div class="stat-card-title">Puzzle Library</div>
+              <div class="stat-card-sub">Ready for your next challenge</div>
+            </div>
+          </div>
+          <div class="hero-stat-card glass-card">
+            <div class="stat-card-icon text-green">🟢</div>
+            <div class="stat-card-body">
+              <div class="stat-card-title">System Ready</div>
+              <div class="stat-card-sub">High-Speed Engine</div>
+            </div>
+          </div>
+          <div class="hero-stat-card glass-card">
+            <div class="stat-card-icon text-orange">🔥</div>
+            <div class="stat-card-body">
+              <div class="stat-card-title"><span id="hero-streak-display">0</span> Day Streak</div>
+              <div class="stat-card-sub">Keep solving today!</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 10 Progression Levels Grid -->
+      <div class="levels-overview-section">
+        <div class="section-header text-center">
+          <span class="section-tag">TIER PROGRESSION</span>
+          <h2 class="section-title">Choose Your Challenge</h2>
+          <p class="section-desc">Select a difficulty to generate an authentic Sudoku challenge.</p>
+        </div>
+
+        <div class="level-cards-grid" id="level-cards-grid">
+          <!-- Dynamically populated 10 Level Cards -->
+        </div>
+      </div>
+
+      <!-- YOUR SUDOKU JOURNEY (Roadmap) -->
+      <div class="journey-roadmap-section">
+        <div class="section-header text-center">
+          <span class="section-tag">PROGRESSION ROADMAP</span>
+          <h2 class="section-title">Your Sudoku Journey</h2>
+          <p class="section-desc">Track your mastery from Novice to Grandmaster.</p>
+        </div>
+
+        <div class="roadmap-track-container" id="roadmap-track-container">
+          <!-- Populated by JavaScript -->
+        </div>
+      </div>
+
+      <!-- Ranked Mode Showcase on Home -->
+      <div class="home-ranked-showcase glass-card">
+        <div class="hr-left">
+          <span class="section-tag text-purple">COMPETITIVE LEAGUE</span>
+          <h2 class="hr-title">🏆 RANKED MODE</h2>
+          <p class="hr-desc">Test your speed & accuracy against real solvers in live matches. Earn ELO rating, climb the 8 competitive tiers, and claim your place on the Global Leaderboard.</p>
+          <div class="hr-tiers-preview">
+            <span class="hr-tier-badge bronze">🥉 Bronze</span>
+            <span class="hr-tier-badge silver">🥈 Silver</span>
+            <span class="hr-tier-badge gold">🥇 Gold</span>
+            <span class="hr-tier-badge platinum">💎 Platinum</span>
+            <span class="hr-tier-badge master">👑 Master</span>
+            <span class="hr-tier-badge legend">🏆 Legend</span>
+          </div>
+          <button class="btn btn-ranked btn-lg" onclick="navigateTo('ranked')">
+            <span>ENTER RANKED LEAGUE →</span>
+          </button>
+        </div>
+        <div class="hr-right">
+          <div class="hr-matchmaking-preview">
+            <div class="hr-radar-pulse"></div>
+            <div class="hr-radar-text">LIVE MATCHMAKING QUEUE</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RECENT ACHIEVEMENTS SHOWCASE ON HOME -->
+      <div class="home-achievements-preview glass-card">
+        <div class="home-ach-header">
+          <div>
+            <span class="section-tag text-gold">TROPHIES & REWARDS</span>
+            <h2 class="section-title">🏆 RECENT ACHIEVEMENTS</h2>
+          </div>
+          <button class="btn btn-secondary btn-sm" onclick="navigateTo('achievements')">
+            <span>VIEW ALL ACHIEVEMENTS →</span>
+          </button>
+        </div>
+        <div class="home-ach-grid" id="home-ach-preview-grid">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Quick Statistics Section -->
+      <div class="home-stats-preview">
+        <div class="stats-preview-grid">
+          <div class="quick-stat-box glass-card">
+            <span class="qs-val" id="qs-solved">0</span>
+            <span class="qs-lbl">Puzzles Solved</span>
+          </div>
+          <div class="quick-stat-box glass-card">
+            <span class="qs-val text-green" id="qs-winrate">0%</span>
+            <span class="qs-lbl">Accuracy</span>
+          </div>
+          <div class="quick-stat-box glass-card">
+            <span class="qs-val text-gold" id="qs-rank">1000</span>
+            <span class="qs-lbl">Ranked ELO</span>
+          </div>
+          <div class="quick-stat-box glass-card">
+            <span class="qs-val text-cyan" id="qs-best-time">--:--</span>
+            <span class="qs-lbl">Best Solve Time</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== ACHIEVEMENTS DEDICATED VIEW ==================== -->
+    <section class="view-section" id="view-achievements">
+      <div class="achievements-container">
+        
+        <!-- Header & Completion Dashboard -->
+        <div class="ach-dashboard-card glass-card">
+          <div class="ach-header-left">
+            <span class="section-tag text-gold">CAREER TROPHIES</span>
+            <h1 class="ach-title">🏆 ACHIEVEMENTS</h1>
+            <p class="ach-subtitle">Complete challenges. Earn rewards. Prove your mastery.</p>
+          </div>
+
+          <div class="ach-header-right">
+            <div class="ach-progress-stats">
+              <span class="ach-unlocked-count" id="ach-unlocked-count">Unlocked: 0 / 35</span>
+              <span class="ach-pct-badge" id="ach-pct-badge">0%</span>
+            </div>
+            <div class="ach-track-bar">
+              <div class="ach-fill-bar" id="ach-fill-bar" style="width: 0%"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 8 Category Filter Tabs -->
+        <div class="ach-category-tabs">
+          <button class="ach-tab-btn active" data-cat="all" onclick="filterAchievements('all')">ALL</button>
+          <button class="ach-tab-btn" data-cat="progress" onclick="filterAchievements('progress')">🌱 PROGRESS</button>
+          <button class="ach-tab-btn" data-cat="speed" onclick="filterAchievements('speed')">⚡ SPEED</button>
+          <button class="ach-tab-btn" data-cat="accuracy" onclick="filterAchievements('accuracy')">🎯 ACCURACY</button>
+          <button class="ach-tab-btn" data-cat="streak" onclick="filterAchievements('streak')">🔥 STREAK</button>
+          <button class="ach-tab-btn" data-cat="mastery" onclick="filterAchievements('mastery')">🌟 MASTERY</button>
+          <button class="ach-tab-btn" data-cat="ranked" onclick="filterAchievements('ranked')">🏅 RANKED</button>
+          <button class="ach-tab-btn" data-cat="special" onclick="filterAchievements('special')">🧠 SPECIAL</button>
+        </div>
+
+        <!-- Achievement Cards Grid -->
+        <div class="achievements-grid" id="achievements-grid">
+          <!-- Populated by JavaScript -->
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==================== PLAY VIEW (Sudoku Grid & Controls) ==================== -->
+    <section class="view-section" id="view-play">
+      <div class="play-container">
+        
+        <!-- Game Top Header Bar -->
+        <div class="game-top-bar glass-card">
+          <div class="game-meta-left">
+            <div class="game-level-chip" id="game-level-chip">Level 4 Medium</div>
+            <div class="game-clues-info" id="game-clues-info">30 Clues</div>
+          </div>
+
+          <div class="game-meta-center">
+            <div class="game-timer-display" id="game-timer">00:00</div>
+          </div>
+
+          <div class="game-meta-right">
+            <div class="mistakes-counter" id="mistakes-counter">
+              <span class="mistake-label">MISTAKES:</span>
+              <span class="mistake-hearts" id="mistake-hearts">❤️❤️❤️</span>
+            </div>
+            <div class="score-display">
+              <span class="score-label">XP:</span>
+              <span class="score-val" id="active-xp-val">+100</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Interactive Gameplay Stage -->
+        <div class="gameplay-stage">
+          
+          <!-- Sudoku 9x9 Grid -->
+          <div class="sudoku-board-wrap">
+            <div class="sudoku-grid" id="sudoku-grid" tabindex="0" role="grid" aria-label="Sudoku Board">
+              <!-- 81 Cells dynamically generated with proper ARIA attributes -->
+            </div>
+          </div>
+
+          <!-- Controls Panel -->
+          <div class="game-controls-panel glass-card">
+            
+            <!-- Quick Action Tools -->
+            <div class="action-tools-grid">
+              <button class="tool-btn" id="tool-undo" onclick="handleUndo()" title="Undo Move (U)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="tool-icon"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>
+                <span>Undo</span>
+              </button>
+              
+              <button class="tool-btn" id="tool-erase" onclick="handleErase()" title="Erase Cell (Backspace/Delete)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="tool-icon"><path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"/><path d="M22 21H7"/><path d="m5 11 9 9"/></svg>
+                <span>Erase</span>
+              </button>
+
+              <button class="tool-btn" id="tool-notes" onclick="toggleNotesMode()" title="Toggle Pencil Notes (N)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="tool-icon"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                <span>Notes <strong id="notes-status-badge">OFF</strong></span>
+              </button>
+
+              <button class="tool-btn" id="tool-hint" onclick="handleHint()" title="Request Smart Hint (H)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="tool-icon"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7Z"/></svg>
+                <span>Hint (<strong id="hints-remaining-count">3</strong>)</span>
+              </button>
+            </div>
+
+            <!-- Number Keypad (1-9) -->
+            <div class="numpad-container">
+              <div class="numpad-grid">
+                <button class="num-key" data-num="1" onclick="inputNumber(1)">1<span class="num-rem" id="rem-1"></span></button>
+                <button class="num-key" data-num="2" onclick="inputNumber(2)">2<span class="num-rem" id="rem-2"></span></button>
+                <button class="num-key" data-num="3" onclick="inputNumber(3)">3<span class="num-rem" id="rem-3"></span></button>
+                <button class="num-key" data-num="4" onclick="inputNumber(4)">4<span class="num-rem" id="rem-4"></span></button>
+                <button class="num-key" data-num="5" onclick="inputNumber(5)">5<span class="num-rem" id="rem-5"></span></button>
+                <button class="num-key" data-num="6" onclick="inputNumber(6)">6<span class="num-rem" id="rem-6"></span></button>
+                <button class="num-key" data-num="7" onclick="inputNumber(7)">7<span class="num-rem" id="rem-7"></span></button>
+                <button class="num-key" data-num="8" onclick="inputNumber(8)">8<span class="num-rem" id="rem-8"></span></button>
+                <button class="num-key" data-num="9" onclick="inputNumber(9)">9<span class="num-rem" id="rem-9"></span></button>
+              </div>
+            </div>
+
+            <!-- Level Selector & New Game Button -->
+            <div class="level-switch-controls">
+              <div class="select-wrapper">
+                <label for="difficulty-selector" class="control-label">Difficulty / Level:</label>
+                <select id="difficulty-selector" class="custom-select" onchange="changeGameLevel(this.value)">
+                  <!-- 10 Options populated via JS -->
+                </select>
+              </div>
+
+              <div class="bottom-game-actions">
+                <button class="btn btn-secondary w-full" onclick="startNewGame()">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-sm"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                  <span>New Puzzle</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== RANKED HUB VIEW ==================== -->
+    <section class="view-section" id="view-ranked">
+      <div class="ranked-container">
+        
+        <!-- Header & Current Rating Card -->
+        <div class="ranked-header-card glass-card">
+          <div class="r-hub-left">
+            <div class="r-badge-tier-icon" id="ranked-hub-icon">🥉</div>
+            <div class="r-hub-info">
+              <div class="r-hub-tier-name" id="ranked-hub-tier">BRONZE I</div>
+              <div class="r-hub-rating-large" id="ranked-hub-rating">1000 Rating</div>
+              
+              <!-- Progress to Next Tier -->
+              <div class="r-tier-progress-wrap">
+                <div class="r-tier-progress-labels">
+                  <span id="ranked-curr-tier-label">Bronze I</span>
+                  <span id="ranked-next-tier-label">200 rating needed to Silver</span>
+                </div>
+                <div class="r-tier-bar-track">
+                  <div class="r-tier-bar-fill" id="ranked-tier-progress-fill" style="width: 0%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="r-hub-right">
+            <button class="btn btn-ranked btn-lg" onclick="openRankedMatchmaking()">
+              <span>⚡ FIND MATCH</span>
+            </button>
+            <div class="r-queue-status">
+              <span class="status-indicator-green">🟢</span>
+              <span>Matchmaking Queue: Ready</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 8 Ranked Tiers Overview Grid -->
+        <div class="ranked-tiers-grid">
+          <div class="tier-pill-card bronze active"><span class="t-icon">🥉</span><span class="t-name">BRONZE</span><span class="t-range">1000–1199</span></div>
+          <div class="tier-pill-card silver"><span class="t-icon">🥈</span><span class="t-name">SILVER</span><span class="t-range">1200–1399</span></div>
+          <div class="tier-pill-card gold"><span class="t-icon">🥇</span><span class="t-name">GOLD</span><span class="t-range">1400–1599</span></div>
+          <div class="tier-pill-card platinum"><span class="t-icon">💎</span><span class="t-name">PLATINUM</span><span class="t-range">1600–1799</span></div>
+          <div class="tier-pill-card diamond"><span class="t-icon">💠</span><span class="t-name">DIAMOND</span><span class="t-range">1800–1999</span></div>
+          <div class="tier-pill-card master"><span class="t-icon">👑</span><span class="t-name">MASTER</span><span class="t-range">2000–2199</span></div>
+          <div class="tier-pill-card grandmaster"><span class="t-icon">🔥</span><span class="t-name">GRANDMASTER</span><span class="t-range">2200–2399</span></div>
+          <div class="tier-pill-card legend"><span class="t-icon">🏆</span><span class="t-name">LEGEND</span><span class="t-range">2400+</span></div>
+        </div>
+
+        <!-- Season 01 Banner -->
+        <div class="season-banner-card glass-card">
+          <div class="season-left">
+            <span class="season-tag">SEASON 01</span>
+            <h3 class="season-title">"MASTER THE GRID"</h3>
+            <p class="season-sub">Season ends in <strong id="season-time-left">23 days 14 hours</strong>. Climb the ranks to unlock seasonal rewards.</p>
+          </div>
+          <div class="season-rewards-preview">
+            <span class="s-reward-chip">🥉 100 XP</span>
+            <span class="s-reward-chip">🥇 500 XP</span>
+            <span class="s-reward-chip">💎 1000 XP</span>
+            <span class="s-reward-chip">🏆 Exclusive Badge</span>
+          </div>
+        </div>
+
+        <!-- Global Leaderboard -->
+        <div class="leaderboard-section glass-card">
+          <div class="section-header">
+            <span class="section-tag">GLOBAL COMPETITIVE STANDINGS</span>
+            <h2 class="section-title">🏆 GLOBAL LEADERBOARD</h2>
+            <p class="section-desc">Authentic leaderboard of registered players sorted by rating.</p>
+          </div>
+
+          <div class="table-responsive">
+            <table class="leaderboard-table" id="leaderboard-table">
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Player</th>
+                  <th>Rating</th>
+                  <th>Tier</th>
+                  <th>Wins</th>
+                  <th>Win Rate</th>
+                  <th>XP</th>
+                </tr>
+              </thead>
+              <tbody id="leaderboard-tbody">
+                <!-- Populated via JS -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Empty state if no players yet -->
+          <div class="empty-state-card" id="leaderboard-empty-state" style="display: none;">
+            <div class="empty-state-icon">🏆</div>
+            <h3 class="empty-state-title">No Ranked Players Yet</h3>
+            <p class="empty-state-desc">Enter Ranked Mode to become the first solver on the seasonal leaderboard!</p>
+            <button class="btn btn-ranked btn-md" onclick="openRankedMatchmaking()">
+              <span>⚡ ENTER RANKED QUEUE</span>
+            </button>
+          </div>
+
+          <div class="table-footer-note">* Ratings and leaderboards update in real time from database match completions.</div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==================== DAILY CHALLENGE VIEW ==================== -->
+    <section class="view-section" id="view-daily">
+      <div class="daily-container">
+        
+        <div class="daily-hero glass-card">
+          <div class="daily-badge">
+            <span class="fire-anim">🔥</span>
+            <span>DAILY SUDOKU QUEST</span>
+          </div>
+          <h1 class="daily-title">Today's Daily Challenge</h1>
+          <p class="daily-subtitle" id="daily-date-display">Today, October 8</p>
+
+          <div class="daily-info-grid">
+            <div class="daily-info-box">
+              <div class="daily-info-label">DIFFICULTY</div>
+              <div class="daily-info-val text-cyan" id="daily-diff-display">Medium</div>
+            </div>
+            <div class="daily-info-box">
+              <div class="daily-info-label">REWARD</div>
+              <div class="daily-info-val text-gold" id="daily-xp-display">+200 XP • Double Coins</div>
+            </div>
+            <div class="daily-info-box">
+              <div class="daily-info-label">STATUS</div>
+              <div class="daily-info-val" id="daily-status-display">Uncompleted</div>
+            </div>
+          </div>
+
+          <div class="daily-actions">
+            <button class="btn btn-primary btn-lg" id="daily-start-btn" onclick="startDailyChallenge()">
+              <span>START CHALLENGE</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="btn-arrow"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- 7-Day Streak Tracker -->
+        <div class="streak-tracker-section glass-card">
+          <h3 class="tracker-title">7-Day Streak Calendar</h3>
+          <div class="calendar-days-row" id="streak-calendar-row">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==================== STATISTICS VIEW ==================== -->
+    <section class="view-section" id="view-stats">
+      <div class="stats-container">
+        
+        <div class="section-header">
+          <span class="section-tag">SOLVER ANALYTICS</span>
+          <h1 class="section-title">Statistics & Performance</h1>
+          <p class="section-desc">Track your speed, accuracy, and streak progress across your authentic puzzle journey.</p>
+        </div>
+
+        <!-- Empty state when 0 games played -->
+        <div class="empty-state-card" id="stats-empty-state" style="display: none;">
+          <div class="empty-state-icon">📊</div>
+          <h3 class="empty-state-title">No Games Played Yet</h3>
+          <p class="empty-state-desc">Your gameplay analytics, accuracy, and solve times will appear here after your first game.</p>
+          <button class="btn btn-primary btn-md" onclick="navigateTo('play')">
+            <span>START YOUR FIRST GAME</span>
+          </button>
+        </div>
+
+        <!-- Metric Cards Container -->
+        <div id="stats-content-wrapper">
+          <div class="stats-cards-grid">
+            
+            <div class="stat-metric-card glass-card">
+              <div class="stat-icon-wrap icon-cyan">🧩</div>
+              <div class="stat-data">
+                <span class="stat-num" id="stat-puzzles-solved">0</span>
+                <span class="stat-name">Puzzles Solved</span>
+              </div>
+            </div>
+
+            <div class="stat-metric-card glass-card">
+              <div class="stat-icon-wrap icon-orange">🔥</div>
+              <div class="stat-data">
+                <span class="stat-num" id="stat-current-streak">0</span>
+                <span class="stat-name">Current Streak</span>
+              </div>
+            </div>
+
+            <div class="stat-metric-card glass-card">
+              <div class="stat-icon-wrap icon-gold">🏆</div>
+              <div class="stat-data">
+                <span class="stat-num" id="stat-best-streak">0</span>
+                <span class="stat-name">Best Streak</span>
+              </div>
+            </div>
+
+            <div class="stat-metric-card glass-card">
+              <div class="stat-icon-wrap icon-blue">⏱️</div>
+              <div class="stat-data">
+                <span class="stat-num" id="stat-avg-time">--:--</span>
+                <span class="stat-name">Average Time</span>
+              </div>
+            </div>
+
+            <div class="stat-metric-card glass-card">
+              <div class="stat-icon-wrap icon-green">⚡</div>
+              <div class="stat-data">
+                <span class="stat-num" id="stat-best-time">--:--</span>
+                <span class="stat-name">Best Time</span>
+              </div>
+            </div>
+
+            <div class="stat-metric-card glass-card">
+              <div class="stat-icon-wrap icon-purple">🎯</div>
+              <div class="stat-data">
+                <span class="stat-num" id="stat-accuracy">100%</span>
+                <span class="stat-name">Accuracy Rate</span>
+              </div>
+            </div>
+
+            <div class="stat-metric-card glass-card">
+              <div class="stat-icon-wrap icon-red">❌</div>
+              <div class="stat-data">
+                <span class="stat-num" id="stat-total-mistakes">0</span>
+                <span class="stat-name">Total Mistakes</span>
+              </div>
+            </div>
+
+            <div class="stat-metric-card glass-card">
+              <div class="stat-icon-wrap icon-yellow">💡</div>
+              <div class="stat-data">
+                <span class="stat-num" id="stat-hints-used">0</span>
+                <span class="stat-name">Hints Used</span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- 10-Tier Level Breakdown -->
+          <div class="diff-breakdown-section glass-card">
+            <h3 class="chart-title mb-4">Progression Levels Solved</h3>
+            <div class="diff-bars-grid" id="stats-level-bars">
+              <!-- Populated via JS for all 10 tiers -->
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==================== PROFILE VIEW ==================== -->
+    <section class="view-section" id="view-profile">
+      <div class="profile-container">
+        
+        <!-- Player Banner Card -->
+        <div class="profile-hero glass-card">
+          <div class="profile-user-left">
+            <div class="profile-avatar-large">
+              <span id="profile-avatar-emoji">🧙‍♂️</span>
+              <button class="avatar-change-btn" onclick="openAvatarModal()" title="Change Avatar">✏️</button>
+            </div>
+            <div class="profile-user-info">
+              <div class="profile-name-row">
+                <h2 class="profile-username" id="profile-username-display">Guest Player</h2>
+                <span class="profile-tier-badge" id="profile-tier-badge">Level 1 Beginner</span>
+              </div>
+              <p class="profile-tagline" id="profile-tagline">Solving daily challenges on the 9x9 grid.</p>
+              
+              <!-- XP Level Bar -->
+              <div class="profile-xp-container">
+                <div class="xp-labels">
+                  <span id="profile-current-lvl-text">Level 1 Beginner</span>
+                  <span id="profile-xp-text">0 / 100 XP</span>
+                </div>
+                <div class="xp-bar-track">
+                  <div class="xp-bar-fill" id="profile-xp-fill" style="width: 0%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="profile-hero-stats">
+            <div class="p-stat-box">
+              <span class="p-stat-val text-gold" id="profile-rank-val">1000</span>
+              <span class="p-stat-lbl">Ranked Rating</span>
+            </div>
+            <div class="p-stat-box">
+              <span class="p-stat-val text-orange" id="profile-streak-val">0</span>
+              <span class="p-stat-lbl">Current Streak</span>
+            </div>
+            <div class="p-stat-box">
+              <span class="p-stat-val text-cyan" id="profile-puzzles-val">0</span>
+              <span class="p-stat-lbl">Puzzles Solved</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Profile Achievement Summary Card -->
+        <div class="profile-achieve-card glass-card">
+          <div class="p-achieve-header">
+            <div>
+              <span class="section-tag">TROPHY SUMMARY</span>
+              <h3 class="p-achieve-title">ACHIEVEMENTS</h3>
+              <div class="p-achieve-count" id="profile-achieve-unlocked-text">🏆 0 / 35 Unlocked</div>
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="navigateTo('achievements')">
+              <span>VIEW ACHIEVEMENTS →</span>
+            </button>
+          </div>
+
+          <div class="p-achieve-track">
+            <div class="p-achieve-fill" id="profile-achieve-fill" style="width: 0%"></div>
+          </div>
+
+          <div class="p-recent-badges" id="profile-recent-badges">
+            <!-- Latest badge chips rendered via JS -->
+          </div>
+        </div>
+
+        <!-- Ranked Career Profile Section -->
+        <div class="ranked-profile-card glass-card">
+          <div class="section-header">
+            <span class="section-tag">COMPETITIVE METRICS</span>
+            <h2 class="section-title">Ranked Career</h2>
+          </div>
+          
+          <div class="ranked-profile-stats-grid">
+            <div class="r-card-stat">
+              <span class="rc-label">Matches</span>
+              <span class="rc-val" id="rc-matches">0</span>
+            </div>
+            <div class="r-card-stat">
+              <span class="rc-label">Wins</span>
+              <span class="rc-val text-green" id="rc-wins">0</span>
+            </div>
+            <div class="r-card-stat">
+              <span class="rc-label">Losses</span>
+              <span class="rc-val text-red" id="rc-losses">0</span>
+            </div>
+            <div class="r-card-stat">
+              <span class="rc-label">Win Rate</span>
+              <span class="rc-val text-gold" id="rc-winrate">0.0%</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==================== FOOTER ==================== -->
+    <footer class="app-footer">
+      <div class="footer-container">
+        <div class="footer-brand">
+          <span class="footer-logo">SUDOKU QUEST</span>
+          <span class="footer-copy">© 2026 Sudoku Quest Pro. Real-Time Competitive Sudoku Engine.</span>
+        </div>
+        <div class="footer-links">
+          <a href="javascript:void(0)" onclick="navigateTo('home')">Home</a>
+          <a href="javascript:void(0)" onclick="navigateTo('play')">Play</a>
+          <a href="javascript:void(0)" onclick="navigateTo('daily')">Daily Challenge</a>
+          <a href="javascript:void(0)" onclick="navigateTo('achievements')">Achievements</a>
+          <a href="javascript:void(0)" onclick="navigateTo('ranked')">Ranked</a>
+          <a href="javascript:void(0)" onclick="navigateTo('stats')">Statistics</a>
+          <a href="javascript:void(0)" onclick="navigateTo('profile')">Profile</a>
+        </div>
+      </div>
+    </footer>
+
+  </main>
+
+
+  <!-- ==================== AUTHENTICATION MODAL ==================== -->
+  <div class="modal-backdrop" id="auth-modal">
+    <div class="modal-card glass-card auth-modal-card">
+      <div class="auth-tabs">
+        <button class="auth-tab-btn active" id="auth-tab-login" onclick="switchAuthTab('login')">Sign In</button>
+        <button class="auth-tab-btn" id="auth-tab-register" onclick="switchAuthTab('register')">Create Account</button>
+      </div>
+
+      <!-- Sign In Form -->
+      <form id="form-login" onsubmit="handleLoginSubmit(event)">
+        <div class="auth-banner-msg" id="auth-login-error" style="display: none;"></div>
+        
+        <div class="form-group">
+          <label class="form-label">Username or Email</label>
+          <input type="text" id="login-identifier" class="form-input" placeholder="Enter username or email" required autocomplete="username">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" id="login-password" class="form-input" placeholder="Enter password" required autocomplete="current-password">
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg w-full mt-3" id="btn-login-submit">
+          <span>SIGN IN</span>
+        </button>
+      </form>
+
+      <!-- Create Account Form -->
+      <form id="form-register" onsubmit="handleRegisterSubmit(event)" style="display: none;">
+        <div class="auth-banner-msg" id="auth-register-error" style="display: none;"></div>
+
+        <div class="form-group">
+          <label class="form-label">Username</label>
+          <input type="text" id="reg-username" class="form-input" placeholder="Choose a username" required minlength="3" autocomplete="username">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" id="reg-email" class="form-input" placeholder="your@email.com" required autocomplete="email">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Display Name (Optional)</label>
+          <input type="text" id="reg-display-name" class="form-input" placeholder="How should other players see you?">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" id="reg-password" class="form-input" placeholder="Min. 6 characters" required minlength="6" autocomplete="new-password">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Pick Avatar</label>
+          <div class="avatar-picker-grid">
+            <button type="button" class="avatar-opt active" data-avatar="🧙‍♂️" onclick="selectAvatar('🧙‍♂️')">🧙‍♂️</button>
+            <button type="button" class="avatar-opt" data-avatar="⚡" onclick="selectAvatar('⚡')">⚡</button>
+            <button type="button" class="avatar-opt" data-avatar="👑" onclick="selectAvatar('👑')">👑</button>
+            <button type="button" class="avatar-opt" data-avatar="💎" onclick="selectAvatar('💎')">💎</button>
+            <button type="button" class="avatar-opt" data-avatar="🏹" onclick="selectAvatar('🏹')">🏹</button>
+            <button type="button" class="avatar-opt" data-avatar="🦁" onclick="selectAvatar('🦁')">🦁</button>
+            <button type="button" class="avatar-opt" data-avatar="🤖" onclick="selectAvatar('🤖')">🤖</button>
+            <button type="button" class="avatar-opt" data-avatar="🚀" onclick="selectAvatar('🚀')">🚀</button>
+          </div>
+          <input type="hidden" id="reg-avatar" value="🧙‍♂️">
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg w-full mt-3" id="btn-register-submit">
+          <span>CREATE ACCOUNT</span>
+        </button>
+      </form>
+
+      <div class="auth-modal-footer">
+        <button class="btn btn-ghost btn-sm" onclick="closeModals()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== EDIT AVATAR MODAL ==================== -->
+  <div class="modal-backdrop" id="avatar-modal">
+    <div class="modal-card glass-card avatar-modal-card">
+      <h3 class="modal-title">Choose Your Avatar</h3>
+      <div class="avatar-picker-grid modal-picker">
+        <button type="button" class="avatar-opt" onclick="updateUserAvatar('🧙‍♂️')">🧙‍♂️</button>
+        <button type="button" class="avatar-opt" onclick="updateUserAvatar('⚡')">⚡</button>
+        <button type="button" class="avatar-opt" onclick="updateUserAvatar('👑')">👑</button>
+        <button type="button" class="avatar-opt" onclick="updateUserAvatar('💎')">💎</button>
+        <button type="button" class="avatar-opt" onclick="updateUserAvatar('🏹')">🏹</button>
+        <button type="button" class="avatar-opt" onclick="updateUserAvatar('🦁')">🦁</button>
+        <button type="button" class="avatar-opt" onclick="updateUserAvatar('🤖')">🤖</button>
+        <button type="button" class="avatar-opt" onclick="updateUserAvatar('🚀')">🚀</button>
+      </div>
+      <button class="btn btn-ghost btn-sm mt-3 w-full" onclick="closeModals()">Close</button>
+    </div>
+  </div>
+
+  <!-- ==================== CELEBRATION UNLOCK MODAL ==================== -->
+  <div class="modal-backdrop" id="achievement-unlocked-modal">
+    <div class="modal-card glass-card ach-unlocked-card">
+      <div class="ach-popup-icon-wrap">
+        <span class="ach-popup-icon" id="ach-popup-icon">🏆</span>
+      </div>
+      <div class="ach-popup-tag">ACHIEVEMENT UNLOCKED!</div>
+      <h2 class="ach-popup-title" id="ach-popup-title">PERFECT SOLVE</h2>
+      <p class="ach-popup-desc" id="ach-popup-desc">Complete a puzzle without making a mistake.</p>
+      <div class="ach-popup-reward" id="ach-popup-reward">+150 XP</div>
+      <button class="btn btn-primary btn-lg w-full" onclick="closeModals()">
+        <span>Awesome!</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ==================== MATCHMAKING REAL-TIME MODAL ==================== -->
+  <div class="modal-backdrop" id="matchmaking-modal">
+    <div class="modal-card glass-card matchmaking-card">
+      <div class="mm-loading-state" id="mm-loading-state">
+        <div class="mm-radar-ring"></div>
+        <h3 class="mm-title">SEARCHING FOR OPPONENT...</h3>
+        <p class="mm-desc">Queueing in Live Ranked League near Rating <strong id="mm-user-rating-find">1000</strong></p>
+        <div class="mm-queue-timer" id="mm-queue-timer">Searching: 00:00</div>
+        
+        <button class="btn btn-secondary btn-sm mt-4" onclick="leaveRankedQueue()">
+          <span>Cancel Queue</span>
+        </button>
+      </div>
+
+      <div class="mm-found-state" id="mm-found-state" style="display: none;">
+        <div class="mm-badge-found">MATCH FOUND</div>
+        <div class="mm-vs-container">
+          <div class="mm-player-side">
+            <div class="mm-avatar" id="mm-my-avatar">🧙‍♂️</div>
+            <div class="mm-name" id="mm-my-name">You</div>
+            <div class="mm-rating text-gold" id="mm-my-rating">1000</div>
+          </div>
+          <div class="mm-vs-badge">VS</div>
+          <div class="mm-player-side">
+            <div class="mm-avatar" id="mm-opp-avatar">⚔️</div>
+            <div class="mm-name" id="mm-opp-name">Opponent</div>
+            <div class="mm-rating text-cyan" id="mm-opp-rating">1000</div>
+          </div>
+        </div>
+
+        <div class="mm-match-details">
+          <span>Tier: <strong id="mm-match-tier">Level 5 Advanced</strong></span> • 
+          <span>Mode: <strong>Live Ranked Multiplayer</strong></span>
+        </div>
+
+        <div class="mm-starting-countdown" id="mm-starting-countdown">Starting in 3s...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== RANKED RESULT MODAL ==================== -->
+  <div class="modal-backdrop" id="ranked-result-modal">
+    <div class="modal-card glass-card ranked-result-card">
+      <div class="r-res-icon" id="r-res-icon">🏆</div>
+      <h2 class="r-res-title" id="r-res-title">VICTORY</h2>
+      <p class="r-res-subtitle" id="r-res-subtitle">Earned competitive rating points!</p>
+
+      <div class="r-res-delta-box">
+        <span class="r-delta-label">RATING CHANGE</span>
+        <span class="r-delta-val" id="r-delta-val">+24</span>
+        <span class="r-new-rating" id="r-new-rating">New Rating: 1024 (BRONZE I)</span>
+      </div>
+
+      <div class="victory-stats-grid">
+        <div class="v-stat-item">
+          <span class="v-stat-label">YOUR TIME</span>
+          <span class="v-stat-val" id="r-stat-mytime">04:32</span>
+        </div>
+        <div class="v-stat-item">
+          <span class="v-stat-label">XP EARNED</span>
+          <span class="v-stat-val text-gold" id="r-stat-xp">+250 XP</span>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-ranked btn-lg w-full" onclick="openRankedMatchmaking()">
+          <span>Next Ranked Match →</span>
+        </button>
+        <button class="btn btn-secondary w-full" onclick="navigateTo('ranked')">
+          <span>View Leaderboard</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== WIN MODAL ==================== -->
+  <div class="modal-backdrop" id="win-modal">
+    <div class="modal-card glass-card victory-card">
+      <div class="victory-icon-wrap">
+        <span class="victory-trophy">🏆</span>
+      </div>
+      <h2 class="victory-title">PUZZLE SOLVED!</h2>
+      <p class="victory-subtitle" id="win-subtitle">Master of the 9×9 Grid</p>
+
+      <div class="victory-stats-grid">
+        <div class="v-stat-item">
+          <span class="v-stat-label">TIME</span>
+          <span class="v-stat-val" id="win-time">04:32</span>
+        </div>
+        <div class="v-stat-item">
+          <span class="v-stat-label">LEVEL / DIFFICULTY</span>
+          <span class="v-stat-val" id="win-diff">Level 4 Medium</span>
+        </div>
+        <div class="v-stat-item">
+          <span class="v-stat-label">MISTAKES</span>
+          <span class="v-stat-val" id="win-mistakes">0</span>
+        </div>
+        <div class="v-stat-item">
+          <span class="v-stat-label">XP EARNED</span>
+          <span class="v-stat-val text-gold" id="win-xp">+180 XP</span>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-primary btn-lg w-full" onclick="playHighestUnlockedLevel()">
+          <span>Play Next Level →</span>
+        </button>
+        <button class="btn btn-secondary w-full" onclick="navigateTo('stats')">
+          <span>View Statistics</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== GAME OVER MODAL ==================== -->
+  <div class="modal-backdrop" id="lose-modal">
+    <div class="modal-card glass-card gameover-card">
+      <div class="gameover-icon">💥</div>
+      <h2 class="gameover-title">3 MISTAKES REACHED</h2>
+      <p class="gameover-subtitle">Every mistake is a step toward mastering the grid.</p>
+
+      <div class="modal-actions">
+        <button class="btn btn-primary btn-lg w-full" onclick="restartCurrentPuzzle()">
+          <span>Restart Puzzle</span>
+        </button>
+        <button class="btn btn-secondary w-full" onclick="startNewGame()">
+          <span>Try Another Puzzle</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Scripts -->
+  <script src="/static/app.js"></script>
+</body>
+</html>
