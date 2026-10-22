@@ -37,3 +37,8 @@ class Move:
             "new_notes": list(self.new_notes),
             "is_correct": self.is_correct,
         }
+
+    @property
+    def is_reversible(self) -> bool:
+        """Return True if previous value is recorded for reliable undo."""
+        return hasattr(self, 'previous_value')
