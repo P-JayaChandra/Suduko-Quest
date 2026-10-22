@@ -1,0 +1,1 @@
+Added standalone Python and JavaScript catalog source files. Existing UI files are unchanged. These catalogs are optional and are not loaded by the application.

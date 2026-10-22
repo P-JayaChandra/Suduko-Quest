@@ -14,6 +14,10 @@ import db
 import sudoku_engine
 import achievements
 import ranked_ws
+from engine.models.board import Board
+from engine.strategies.hint_engine import HintEngine
+
+hint_engine = HintEngine()
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SUDOKU_SECRET_KEY", "sudoku-quest-prod-secret-98231")
@@ -214,7 +218,7 @@ def get_random_puzzle():
     
     return jsonify({
         "id": record.get("id"),
-        "level": record.get("level", level_num or 4),
+        "level": level_num or 4,
         "level_name": lvl_conf["name"],
         "level_display": f"Level {level_num or 4} — {lvl_conf['name']}",
         "difficulty": lvl_conf["key"],
@@ -337,30 +341,116 @@ def submit_game_move(game_id):
 
 @app.post("/api/games/<game_id>/hint")
 def request_game_hint(game_id):
-    """Provide intelligent hint and record usage on server."""
+    """Provide intelligent hint and record usage on server using HintEngine."""
     session = db.get_game_session(game_id)
     if not session or session["status"] != "active":
         return jsonify({"error": "Active game session not found."}), 404
         
-    curr_board = session["current_board"]
-    solution = session["solution"]
+    curr_board_str = session["current_board"]
+    sol_str = session["solution"]
     
-    # Find next empty cell
-    empty_indices = [i for i, ch in enumerate(curr_board) if ch in (".", "0", " ")]
-    if not empty_indices:
-        return jsonify({"error": "No empty cells remaining."}), 400
+    board_obj = Board(curr_board_str)
+    sol_obj = Board(sol_str)
+    
+    hint_result = hint_engine.get_hint(board_obj, sol_obj)
+    
+    # Extract cell coordinates and target value
+    if hint_result.get("target_cell"):
+        r = hint_result["target_cell"]["row"]
+        c = hint_result["target_cell"]["col"]
+        val = hint_result.get("digit") or sol_obj.get_value(r, c)
+    elif hint_result.get("cell"):
+        r = hint_result["cell"]["row"]
+        c = hint_result["cell"]["col"]
+        val = hint_result.get("correct_value") or sol_obj.get_value(r, c)
+    else:
+        # Fallback to first empty cell
+        empty_indices = [i for i, ch in enumerate(curr_board_str) if ch in (".", "0", " ")]
+        if not empty_indices:
+            return jsonify({"error": "No empty cells remaining."}), 400
+        idx = empty_indices[0]
+        r, c = idx // 9, idx % 9
+        val = int(sol_str[idx])
         
-    hint_cell = random.choice(empty_indices)
-    hint_value = solution[hint_cell]
-    
+    cell_index = r * 9 + c
     db.record_game_hint(game_id)
     
     return jsonify({
-        "cell_index": hint_cell,
-        "row": hint_cell // 9,
-        "col": hint_cell % 9,
-        "value": hint_value,
-        "hints_used": session["hints_used"] + 1
+        "cell_index": cell_index,
+        "row": r,
+        "col": c,
+        "value": val,
+        "hints_used": session["hints_used"] + 1,
+        "strategy": hint_result.get("strategy", "Logical Deduction"),
+        "tier": hint_result.get("tier", "BEGINNER"),
+        "explanation": hint_result.get("explanation", f"Placed digit {val} at Row {r+1}, Col {c+1}."),
+        "highlights": hint_result.get("highlights", []),
+        "status": hint_result.get("status", "success"),
+        "action": hint_result.get("action", "place")
+    })
+
+# Backward-compatible API aliases
+@app.post("/api/game/hint")
+def legacy_game_hint():
+    """Backward compatible hint endpoint accepting board and solution."""
+    data = request.get_json(silent=True) or {}
+    board_data = data.get("board")
+    sol_data = data.get("solution")
+    if not board_data:
+        return jsonify({"error": "Board data required."}), 400
+    b_obj = Board(board_data)
+    s_obj = Board(sol_data) if sol_data else None
+    hint_res = hint_engine.get_hint(b_obj, s_obj)
+    return jsonify(hint_res)
+
+@app.post("/api/game/validate")
+def legacy_game_validate():
+    """Backward compatible board validation endpoint."""
+    data = request.get_json(silent=True) or {}
+    board_data = data.get("board")
+    sol_data = data.get("solution")
+    if not board_data:
+        return jsonify({"error": "Board data required."}), 400
+    b_obj = Board(board_data)
+    s_obj = Board(sol_data) if sol_data else None
+    valid = b_obj.is_valid()
+    complete = b_obj.is_complete()
+    conflicts = b_obj.find_conflicts()
+    return jsonify({
+        "valid": valid,
+        "complete": complete,
+        "conflicts": [{"row": r, "col": c} for (r, c) in conflicts],
+        "clues": b_obj.clue_count,
+        "matches_solution": (b_obj == s_obj) if s_obj else None
+    })
+
+@app.get("/api/ranked/leaderboard")
+def legacy_ranked_leaderboard():
+    """Alias for /api/leaderboard."""
+    return get_leaderboard()
+
+@app.get("/api/ranked/match")
+def legacy_ranked_match():
+    """Match endpoint returning rated puzzle and simulated benchmark opponent."""
+    user = get_current_user_from_request()
+    user_rating = user["ranked_rating"] if user else 1000
+    lvl_num = 5 if user_rating < 1400 else (6 if user_rating < 1800 else 7)
+    lvl_conf = sudoku_engine.get_level_by_key(lvl_num)
+    puzzle_data = sudoku_engine.generate_puzzle(difficulty=lvl_conf["key"], level_num=lvl_num)
+    opp_offset = random.randint(-40, 45)
+    return jsonify({
+        "match_id": f"bm_{uuid.uuid4().hex[:12]}",
+        "opponent": {
+            "username": f"BenchmarkSolver_{abs(user_rating + opp_offset)}",
+            "display_name": f"Grandmaster Bot #{random.randint(10, 99)}",
+            "rating": max(1000, user_rating + opp_offset),
+            "tier": sudoku_engine.get_rank_tier(max(1000, user_rating + opp_offset))["full_name"],
+            "avatar": "🤖"
+        },
+        "level": lvl_num,
+        "level_name": lvl_conf["name"],
+        "puzzle": puzzle_data["puzzle"],
+        "solution": puzzle_data["solution"]
     })
 
 @app.post("/api/games/<game_id>/complete")

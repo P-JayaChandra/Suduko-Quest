@@ -165,6 +165,14 @@ def init_db():
     );
     """)
 
+    # Ensure default Guest user exists for unauthenticated gameplay sessions
+    cursor.execute("""
+    INSERT OR IGNORE INTO users (
+        id, username, email, password_hash, display_name, avatar,
+        created_at, updated_at, last_active_at
+    ) VALUES (0, 'guest', 'guest@sudokuquest.local', 'none', 'Guest Player', '🧙‍♂️', '2026-01-01T00:00:00', '2026-01-01T00:00:00', '2026-01-01T00:00:00')
+    """)
+
     conn.commit()
     conn.close()
 
