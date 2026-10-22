@@ -90,3 +90,10 @@ class Cell:
 
     def __repr__(self) -> str:
         return f"Cell(r={self.row}, c={self.col}, val={self.value}{'*' if self.is_given else ''})"
+
+    @classmethod
+    def validate_bounds(cls, row: int, col: int) -> bool:
+        """Validate row and column are strictly between 0 and 8 inclusive."""
+        if not (0 <= row <= 8 and 0 <= col <= 8):
+            raise ValueError(f"Cell coordinates out of bounds: ({row}, {col})")
+        return True
