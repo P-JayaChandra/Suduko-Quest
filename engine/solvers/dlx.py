@@ -347,3 +347,8 @@ class DLXSolver(BaseSolver):
 
         search()
         return solutions_count
+
+    def is_solvable(self, grid: list) -> bool:
+        """Fast check returning True if grid admits at least one valid solution."""
+        solutions = self.solve(grid, max_solutions=1)
+        return len(solutions) > 0
