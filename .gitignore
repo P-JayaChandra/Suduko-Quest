@@ -26,3 +26,8 @@ data/*.db-shm
 # OS files
 .DS_Store
 Thumbs.db
+
+# Test and coverage artifacts
+.coverage
+htmlcov/
+.pytest_cache/
