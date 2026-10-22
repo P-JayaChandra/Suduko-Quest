@@ -314,3 +314,19 @@ class Board:
         if not isinstance(other, Board):
             return False
         return self.to_string() == other.to_string()
+
+    def get_box_conflicts(self, box_index: int) -> list:
+        """Find duplicate non-zero digits in 3x3 box block."""
+        start_r = (box_index // 3) * 3
+        start_c = (box_index % 3) * 3
+        seen = {}
+        conflicts = []
+        for r in range(start_r, start_r + 3):
+            for c in range(start_c, start_c + 3):
+                val = self.get_value(r, c) if hasattr(self, 'get_value') else (self.grid[r][c].value if hasattr(self.grid[r][c], 'value') else self.grid[r][c])
+                if val != 0:
+                    if val in seen:
+                        conflicts.append((seen[val], (r, c), val))
+                    else:
+                        seen[val] = (r, c)
+        return conflicts
