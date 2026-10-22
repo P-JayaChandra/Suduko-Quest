@@ -314,3 +314,10 @@ class Board:
         if not isinstance(other, Board):
             return False
         return self.to_string() == other.to_string()
+
+    def has_any_conflicts(self) -> bool:
+        """Return True if any row, col, or box currently contains duplicate digits."""
+        for i in range(9):
+            if self.get_row_conflicts(i) or self.get_col_conflicts(i) or self.get_box_conflicts(i):
+                return True
+        return False
