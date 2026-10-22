@@ -95,3 +95,8 @@ class CandidateGrid:
                 cloned.values[r][c] = self.values[r][c]
                 cloned.candidates[r][c] = set(self.candidates[r][c])
         return cloned
+
+    def get_candidate_count(self, row: int, col: int) -> int:
+        """Return number of active candidates for cell using bit population count."""
+        mask = self.get_mask(row, col) if hasattr(self, 'get_mask') else self.grid[row][col]
+        return bin(mask).count('1')
