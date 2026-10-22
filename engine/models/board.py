@@ -314,3 +314,13 @@ class Board:
         if not isinstance(other, Board):
             return False
         return self.to_string() == other.to_string()
+
+    def count_placed_digits(self) -> int:
+        """Return number of non-zero cells currently filled on board."""
+        count = 0
+        for r in range(9):
+            for c in range(9):
+                val = self.get_value(r, c) if hasattr(self, 'get_value') else (self.grid[r][c].value if hasattr(self.grid[r][c], 'value') else self.grid[r][c])
+                if val != 0:
+                    count += 1
+        return count
