@@ -314,3 +314,11 @@ class Board:
         if not isinstance(other, Board):
             return False
         return self.to_string() == other.to_string()
+
+    @classmethod
+    def from_flat_list(cls, digits: list):
+        """Construct board from flat 81-element integer list."""
+        if len(digits) != 81:
+            raise ValueError("Input list must contain exactly 81 elements")
+        grid = [digits[i * 9:(i + 1) * 9] for i in range(9)]
+        return cls(grid) if hasattr(cls, '__init__') else grid
