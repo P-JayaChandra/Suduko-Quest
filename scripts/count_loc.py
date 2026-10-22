@@ -31,6 +31,7 @@ EXCLUDE_DIRS = {
 }
 
 EXCLUDE_FILES = {
+    "LOC_EXTENSION_NOTE.txt",
     "sudoku_quest.db",
     "sudoku_records.jsonl",
 }
