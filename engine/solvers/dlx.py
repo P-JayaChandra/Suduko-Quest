@@ -347,3 +347,12 @@ class DLXSolver(BaseSolver):
 
         search()
         return solutions_count
+
+    def get_node_count(self) -> int:
+        """Return estimated total active nodes in current exact cover matrix."""
+        count = 0
+        curr = self.root.right
+        while curr != self.root:
+            count += curr.size
+            curr = curr.right
+        return count
