@@ -90,3 +90,7 @@ class Cell:
 
     def __repr__(self) -> str:
         return f"Cell(r={self.row}, c={self.col}, val={self.value}{'*' if self.is_given else ''})"
+
+    def can_modify(self) -> bool:
+        """Return True if cell is mutable (not an initial given clue)."""
+        return not getattr(self, 'is_given', False)
