@@ -26,3 +26,6 @@ data/*.db-shm
 # OS files
 .DS_Store
 Thumbs.db
+
+# Redundant in-tree backup directory
+SudokuQuest_500K_backup/
