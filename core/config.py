@@ -40,3 +40,7 @@ class Config:
 def get_config() -> Config:
     """Retrieve active configuration singleton."""
     return Config()
+
+def get_env_or_default(key: str, default: str) -> str:
+    """Safe environment variable lookup with fallback default."""
+    return os.environ.get(key, default)
