@@ -314,3 +314,16 @@ class Board:
         if not isinstance(other, Board):
             return False
         return self.to_string() == other.to_string()
+
+    def get_col_conflicts(self, col: int) -> list:
+        """Find duplicate non-zero digits in column, returning conflicting rows."""
+        seen = {}
+        conflicts = []
+        for row in range(9):
+            val = self.get_value(row, col) if hasattr(self, 'get_value') else (self.grid[row][col].value if hasattr(self.grid[row][col], 'value') else self.grid[row][col])
+            if val != 0:
+                if val in seen:
+                    conflicts.append((seen[val], row, val))
+                else:
+                    seen[val] = row
+        return conflicts
