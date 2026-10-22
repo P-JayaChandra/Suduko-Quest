@@ -314,3 +314,13 @@ class Board:
         if not isinstance(other, Board):
             return False
         return self.to_string() == other.to_string()
+
+    def get_box_cells(self, box_index: int) -> list:
+        """Return all 9 cells residing in specified 3x3 box (0-8)."""
+        start_r = (box_index // 3) * 3
+        start_c = (box_index % 3) * 3
+        cells = []
+        for r in range(start_r, start_r + 3):
+            for c in range(start_c, start_c + 3):
+                cells.append(self.get_cell(r, c) if hasattr(self, 'get_cell') else self.grid[r][c])
+        return cells
